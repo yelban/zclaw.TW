@@ -242,7 +242,7 @@ For Telegram control-plane checks without an LLM round trip, use `/diag [scope] 
 - `scope: rates` — request counters (`/hr`, `/day`)
 - `scope: time` — sync status and timezone
 - `scope: all` — multi-line summary across all categories
-- `verbose: true` — includes expanded details (for example raw uptime microseconds)
+- `verbose: true` — includes expanded details (for example uptime in `seconds.microseconds`)
 
 Example tool call inputs:
 
@@ -298,6 +298,8 @@ Agent: [GPIO 5 on → 30s → off] Done, plants watered.
 ```
 
 User tools are stored persistently and survive reboots. Up to 8 custom tools can be defined.
+
+For code-defined firmware tools (new C handlers + reflash), use the "Build Your Own Tool" chapter approach for built-in tools.
 
 **How it works:**
 

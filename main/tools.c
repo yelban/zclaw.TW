@@ -11,158 +11,19 @@ static const char *TAG = "tools";
 // Tool Registry
 // -----------------------------------------------------------------------------
 
+#define TOOL_ENTRY(tool_name, tool_description, tool_schema, tool_execute) \
+    { \
+        .name = tool_name, \
+        .description = tool_description, \
+        .input_schema_json = tool_schema, \
+        .execute = tool_execute \
+    },
+
 static const tool_def_t s_tools[] = {
-    // GPIO
-    {
-        .name = "gpio_write",
-        .description = "Set a GPIO pin HIGH or LOW. Controls LEDs, relays, outputs.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"pin\":{\"type\":\"integer\",\"description\":\"GPIO pin allowed by GPIO Tool Safety policy\"},\"state\":{\"type\":\"integer\",\"description\":\"0=LOW, 1=HIGH\"}},\"required\":[\"pin\",\"state\"]}",
-        .execute = tools_gpio_write_handler
-    },
-    {
-        .name = "gpio_read",
-        .description = "Read a GPIO pin state. Returns HIGH or LOW.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"pin\":{\"type\":\"integer\",\"description\":\"GPIO pin allowed by GPIO Tool Safety policy\"}},\"required\":[\"pin\"]}",
-        .execute = tools_gpio_read_handler
-    },
-    {
-        .name = "gpio_read_all",
-        .description = "Read all tool-allowed GPIO pin states in a single call. Use this when user asks for all GPIO states.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_gpio_read_all_handler
-    },
-    {
-        .name = "delay",
-        .description = "Wait for specified milliseconds (max 60000). Use between GPIO operations.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"milliseconds\":{\"type\":\"integer\",\"description\":\"Time to wait in ms (max 60000)\"}},\"required\":[\"milliseconds\"]}",
-        .execute = tools_delay_handler
-    },
-    {
-        .name = "i2c_scan",
-        .description = "Scan I2C bus for responding 7-bit addresses on selected SDA/SCL pins.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"sda_pin\":{\"type\":\"integer\",\"description\":\"GPIO pin for SDA (subject to GPIO Tool Safety policy)\"},\"scl_pin\":{\"type\":\"integer\",\"description\":\"GPIO pin for SCL (subject to GPIO Tool Safety policy)\"},\"frequency_hz\":{\"type\":\"integer\",\"description\":\"I2C bus speed in Hz (optional, default 100000)\"}},\"required\":[\"sda_pin\",\"scl_pin\"]}",
-        .execute = tools_i2c_scan_handler
-    },
-    // Memory
-    {
-        .name = "memory_set",
-        .description = "Store a value in persistent user memory. Key must start with u_.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\",\"description\":\"User key (max 15 chars, must start with u_)\"},\"value\":{\"type\":\"string\",\"description\":\"Value to store\"}},\"required\":[\"key\",\"value\"]}",
-        .execute = tools_memory_set_handler
-    },
-    {
-        .name = "memory_get",
-        .description = "Retrieve a value from persistent user memory. Key must start with u_.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\",\"description\":\"User key to retrieve (must start with u_)\"}},\"required\":[\"key\"]}",
-        .execute = tools_memory_get_handler
-    },
-    {
-        .name = "memory_list",
-        .description = "List all user memory keys (u_*).",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_memory_list_handler
-    },
-    {
-        .name = "memory_delete",
-        .description = "Delete a key from persistent user memory. Key must start with u_.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\",\"description\":\"User key to delete (must start with u_)\"}},\"required\":[\"key\"]}",
-        .execute = tools_memory_delete_handler
-    },
-    {
-        .name = "set_persona",
-        .description = "Set assistant tone persona. Call only when the user explicitly asks to change persona/tone settings. Affects wording only, never tool or safety behavior.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"persona\":{\"type\":\"string\",\"enum\":[\"neutral\",\"friendly\",\"technical\",\"witty\"],\"description\":\"Persona name\"}},\"required\":[\"persona\"]}",
-        .execute = tools_set_persona_handler
-    },
-    {
-        .name = "get_persona",
-        .description = "Get current assistant tone persona. Use when user asks which persona is active.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_get_persona_handler
-    },
-    {
-        .name = "reset_persona",
-        .description = "Reset assistant tone persona back to neutral. Call only when user explicitly asks to reset persona/tone settings.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_reset_persona_handler
-    },
-    // Cron/Scheduler
-    {
-        .name = "cron_set",
-        .description = "Create a scheduled task. Type 'periodic' runs every N minutes. Type 'daily' runs at a specific local time in the device timezone (see set_timezone/get_timezone). Type 'once' runs one time after N minutes.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"periodic\",\"daily\",\"once\"]},\"interval_minutes\":{\"type\":\"integer\",\"description\":\"For periodic: minutes between runs\"},\"delay_minutes\":{\"type\":\"integer\",\"description\":\"For once: minutes from now before one-time run\"},\"hour\":{\"type\":\"integer\",\"description\":\"For daily: hour 0-23\"},\"minute\":{\"type\":\"integer\",\"description\":\"For daily: minute 0-59\"},\"action\":{\"type\":\"string\",\"description\":\"What to do when triggered\"}},\"required\":[\"type\",\"action\"]}",
-        .execute = tools_cron_set_handler
-    },
-    {
-        .name = "cron_list",
-        .description = "List all scheduled tasks.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_cron_list_handler
-    },
-    {
-        .name = "cron_delete",
-        .description = "Delete a scheduled task by ID.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"description\":\"Schedule ID to delete\"}},\"required\":[\"id\"]}",
-        .execute = tools_cron_delete_handler
-    },
-    {
-        .name = "get_time",
-        .description = "Get current date and time in the configured device timezone.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_get_time_handler
-    },
-    {
-        .name = "set_timezone",
-        .description = "Set device timezone used by get_time and daily cron schedules. Accepts common aliases (UTC, America/Los_Angeles, America/Denver, America/Chicago, America/New_York) or a POSIX TZ string.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"timezone\":{\"type\":\"string\",\"description\":\"Timezone alias or POSIX TZ string\"}},\"required\":[\"timezone\"]}",
-        .execute = tools_set_timezone_handler
-    },
-    {
-        .name = "get_timezone",
-        .description = "Get current device timezone (POSIX string and abbreviation).",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_get_timezone_handler
-    },
-    // System
-    {
-        .name = "get_version",
-        .description = "Get current firmware version.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_get_version_handler
-    },
-    // Health
-    {
-        .name = "get_health",
-        .description = "Get device health status: heap memory, rate limits, time sync, version.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_get_health_handler
-    },
-    {
-        .name = "get_diagnostics",
-        .description = "Get detailed runtime diagnostics. Optional scope: quick, runtime, memory, rates, time, all. Optional verbose=true for expanded output.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"scope\":{\"type\":\"string\",\"enum\":[\"quick\",\"runtime\",\"memory\",\"rates\",\"time\",\"all\"],\"description\":\"Optional diagnostics scope (default quick)\"},\"verbose\":{\"type\":\"boolean\",\"description\":\"Include extra details (default false)\"}}}",
-        .execute = tools_get_diagnostics_handler
-    },
-    // User Tool Management
-    {
-        .name = "create_tool",
-        .description = "Create a custom tool. Provide a short name (no spaces), brief description, and the action to perform when called.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"Tool name (alphanumeric, no spaces)\"},\"description\":{\"type\":\"string\",\"description\":\"Short description for tool list\"},\"action\":{\"type\":\"string\",\"description\":\"What to do when tool is called\"}},\"required\":[\"name\",\"description\",\"action\"]}",
-        .execute = tools_create_tool_handler
-    },
-    {
-        .name = "list_user_tools",
-        .description = "List all user-created custom tools.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{}}",
-        .execute = tools_list_user_tools_handler
-    },
-    {
-        .name = "delete_user_tool",
-        .description = "Delete a user-created custom tool by name.",
-        .input_schema_json = "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"Tool name to delete\"}},\"required\":[\"name\"]}",
-        .execute = tools_delete_user_tool_handler
-    },
+#include "builtin_tools.def"
 };
+
+#undef TOOL_ENTRY
 
 static const int s_tool_count = sizeof(s_tools) / sizeof(s_tools[0]);
 

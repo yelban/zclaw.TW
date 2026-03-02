@@ -50,11 +50,24 @@
         <header>
           <p class="kicker">chapter 5</p>
           <h1 class="page-title">Build Your Own Tool</h1>
-          <p class="deck">Custom tools let you package recurring intent into reusable actions. They are natural-language macros, not new firmware code.</p>
+          <p class="deck">You have two paths: runtime user tools (fast, no reflash) and firmware-coded tools (C handlers, rebuild, reflash).</p>
         </header>
 
         <section class="section">
-          <h2>Mental Model</h2>
+          <h2>Two Approaches</h2>
+          <table>
+            <thead>
+              <tr><th>Approach</th><th>Best for</th><th>Cost</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Runtime user tool (<code>create_tool</code>)</td><td>Fast macros built from existing built-in tools.</td><td>No code changes, no reflash.</td></tr>
+              <tr><td>Firmware tool (new C handler)</td><td>New capabilities, strict validation, external integrations.</td><td>Code + tests + rebuild/reflash.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="section">
+          <h2>Approach 1: Runtime User Tool (No Reflash)</h2>
           <p>A user tool stores a short action string. Later, when the model calls that tool, zclaw returns the action text and the model executes it with built-in tools.</p>
           <pre>1) create_tool(name, description, action)
 2) Tool is saved in NVS
@@ -65,7 +78,7 @@
         </section>
 
         <section class="section">
-          <h2>Creation Contract</h2>
+          <h2>Approach 1 Contract</h2>
           <table>
             <thead>
               <tr><th>Field</th><th>Rule</th><th>Notes</th></tr>
@@ -80,7 +93,7 @@
         </section>
 
         <section class="section">
-          <h2>Authoring Workflow</h2>
+          <h2>Approach 1 Workflow</h2>
           <ol>
             <li>Pick one job with clear start/end conditions.</li>
             <li>Name it by intent: <code>water_plants</code>, <code>prep_night_mode</code>, <code>check_lab_sensor</code>.</li>
@@ -113,6 +126,32 @@ Later...
 You: Build a tool to control the lights.
 Agent: Creates a tool using the remembered lighting pin instead of asking you to restate wiring.</pre>
           <p class="inline-note">Pattern: teach wiring once with memory, then create higher-level tools in plain language.</p>
+        </section>
+
+        <section class="section">
+          <h2>Approach 2: Firmware Tool (C Code + Reflash)</h2>
+          <p>Use this path when you need behavior that is not a composition of existing tools (new I/O paths, strict schemas, deterministic validation, special error handling).</p>
+          <ol>
+            <li>Implement handler logic in <code>main/tools_*.c</code> with signature <code>bool handler(const cJSON *input, char *result, size_t result_len)</code>.</li>
+            <li>Declare it in <code>main/tools_handlers.h</code>.</li>
+            <li>Add one entry in <code>main/builtin_tools.def</code>.</li>
+            <li>Add/extend host tests in <code>test/host/</code>.</li>
+            <li>Build, flash, verify behavior on device.</li>
+          </ol>
+          <pre>TOOL_ENTRY("relay_status",
+           "Get relay health from host web relay.",
+           "{\"type\":\"object\",\"properties\":{}}",
+           tools_relay_status_handler)</pre>
+          <p class="inline-note">Built-in registry is centralized in <code>main/builtin_tools.def</code> to make code-path tool additions one edit after handler implementation.</p>
+        </section>
+
+        <section class="section">
+          <h2>How To Choose</h2>
+          <ul>
+            <li>Choose Approach 1 if existing built-in tools can express the behavior.</li>
+            <li>Choose Approach 2 if you need new capability, strict schema contracts, or firmware-level guarantees.</li>
+            <li>Start with Approach 1 to validate demand, then promote to Approach 2 when stability or performance matters.</li>
+          </ul>
         </section>
 
         <section class="section">

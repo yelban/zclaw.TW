@@ -17,6 +17,7 @@ typedef struct tool_def {
 
 // Initialize the tool registry
 void tools_init(void);
+// Built-in tool definitions are listed in main/builtin_tools.def.
 
 // Get all registered tools
 const tool_def_t *tools_get_all(int *count);
