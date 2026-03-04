@@ -283,6 +283,161 @@ TEST(parse_api_error)
     return 0;
 }
 
+TEST(reasoning_fallback)
+{
+    mock_llm_set_backend(LLM_BACKEND_OPENROUTER, "deepseek-r1");
+
+    const char *response = "{"
+        "\"choices\":[{"
+            "\"message\":{"
+                "\"role\":\"assistant\","
+                "\"content\":null,"
+                "\"reasoning_content\":\"The user wants GPIO 4 on\""
+            "}"
+        "}]"
+    "}";
+
+    char text[256] = {0};
+    char tool_name[32] = {0};
+    char tool_id[64] = {0};
+    cJSON *tool_input = NULL;
+
+    ASSERT(json_parse_response(response, text, sizeof(text),
+                               tool_name, sizeof(tool_name),
+                               tool_id, sizeof(tool_id),
+                               &tool_input));
+    ASSERT_STR_EQ(text, "The user wants GPIO 4 on");
+
+    json_free_parsed_response();
+    return 0;
+}
+
+TEST(reasoning_prefers_content)
+{
+    mock_llm_set_backend(LLM_BACKEND_OPENROUTER, "deepseek-r1");
+
+    const char *response = "{"
+        "\"choices\":[{"
+            "\"message\":{"
+                "\"role\":\"assistant\","
+                "\"content\":\"GPIO 4 is now on.\","
+                "\"reasoning_content\":\"thinking about it...\""
+            "}"
+        "}]"
+    "}";
+
+    char text[256] = {0};
+    char tool_name[32] = {0};
+    char tool_id[64] = {0};
+    cJSON *tool_input = NULL;
+
+    ASSERT(json_parse_response(response, text, sizeof(text),
+                               tool_name, sizeof(tool_name),
+                               tool_id, sizeof(tool_id),
+                               &tool_input));
+    ASSERT_STR_EQ(text, "GPIO 4 is now on.");
+
+    json_free_parsed_response();
+    return 0;
+}
+
+TEST(reasoning_strips_think)
+{
+    mock_llm_set_backend(LLM_BACKEND_OPENROUTER, "deepseek-r1");
+
+    const char *response = "{"
+        "\"choices\":[{"
+            "\"message\":{"
+                "\"role\":\"assistant\","
+                "\"content\":null,"
+                "\"reasoning_content\":\"<think>internal reasoning</think>The actual answer\""
+            "}"
+        "}]"
+    "}";
+
+    char text[256] = {0};
+    char tool_name[32] = {0};
+    char tool_id[64] = {0};
+    cJSON *tool_input = NULL;
+
+    ASSERT(json_parse_response(response, text, sizeof(text),
+                               tool_name, sizeof(tool_name),
+                               tool_id, sizeof(tool_id),
+                               &tool_input));
+    ASSERT_STR_EQ(text, "The actual answer");
+
+    json_free_parsed_response();
+    return 0;
+}
+
+TEST(reasoning_think_only)
+{
+    mock_llm_set_backend(LLM_BACKEND_OPENROUTER, "deepseek-r1");
+
+    const char *response = "{"
+        "\"choices\":[{"
+            "\"message\":{"
+                "\"role\":\"assistant\","
+                "\"content\":null,"
+                "\"reasoning_content\":\"<think>all thinking no answer</think>\""
+            "}"
+        "}]"
+    "}";
+
+    char text[256] = {0};
+    char tool_name[32] = {0};
+    char tool_id[64] = {0};
+    cJSON *tool_input = NULL;
+
+    ASSERT(json_parse_response(response, text, sizeof(text),
+                               tool_name, sizeof(tool_name),
+                               tool_id, sizeof(tool_id),
+                               &tool_input));
+    ASSERT_STR_EQ(text, "all thinking no answer");
+
+    json_free_parsed_response();
+    return 0;
+}
+
+TEST(tool_choice_present)
+{
+    mock_llm_set_backend(LLM_BACKEND_OPENAI, "gpt-test-model");
+
+    char *request = json_build_request("sys prompt", NULL, 0, "hello",
+                                       s_test_tools, 1);
+    ASSERT(request != NULL);
+
+    cJSON *root = cJSON_Parse(request);
+    ASSERT(root != NULL);
+
+    cJSON *tool_choice = cJSON_GetObjectItem(root, "tool_choice");
+    ASSERT(tool_choice != NULL && cJSON_IsString(tool_choice));
+    ASSERT_STR_EQ(tool_choice->valuestring, "auto");
+
+    cJSON_Delete(root);
+    free(request);
+    return 0;
+}
+
+TEST(tool_choice_absent_no_tools)
+{
+    mock_llm_set_backend(LLM_BACKEND_OPENAI, "gpt-test-model");
+
+    char *request = json_build_request("sys prompt", NULL, 0, "hello",
+                                       NULL, 0);
+    ASSERT(request != NULL);
+
+    cJSON *root = cJSON_Parse(request);
+    ASSERT(root != NULL);
+
+    cJSON *tool_choice = cJSON_GetObjectItem(root, "tool_choice");
+    ASSERT(tool_choice == NULL);
+
+    cJSON_Delete(root);
+    free(request);
+    return 0;
+}
+
 int test_json_util_integration_all(void)
 {
     int failures = 0;
@@ -333,6 +488,48 @@ int test_json_util_integration_all(void)
 
     printf("  parse_api_error... ");
     if (test_parse_api_error() == 0) {
+        printf("OK\n");
+    } else {
+        failures++;
+    }
+
+    printf("  reasoning_fallback... ");
+    if (test_reasoning_fallback() == 0) {
+        printf("OK\n");
+    } else {
+        failures++;
+    }
+
+    printf("  reasoning_prefers_content... ");
+    if (test_reasoning_prefers_content() == 0) {
+        printf("OK\n");
+    } else {
+        failures++;
+    }
+
+    printf("  reasoning_strips_think... ");
+    if (test_reasoning_strips_think() == 0) {
+        printf("OK\n");
+    } else {
+        failures++;
+    }
+
+    printf("  reasoning_think_only... ");
+    if (test_reasoning_think_only() == 0) {
+        printf("OK\n");
+    } else {
+        failures++;
+    }
+
+    printf("  tool_choice_present... ");
+    if (test_tool_choice_present() == 0) {
+        printf("OK\n");
+    } else {
+        failures++;
+    }
+
+    printf("  tool_choice_absent_no_tools... ");
+    if (test_tool_choice_absent_no_tools() == 0) {
         printf("OK\n");
     } else {
         failures++;

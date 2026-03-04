@@ -256,6 +256,44 @@ static bool parse_anthropic_response(
     return true;
 }
 
+// Strip <think>...</think> tags from reasoning model output.
+// Writes the remaining text (after the first closing </think>) into out.
+// If no </think> is found the full input is copied as-is.
+static void extract_reasoning_content(const char *input, char *out, size_t out_len)
+{
+    if (!input || !out || out_len == 0) {
+        return;
+    }
+
+    const char *result = input;
+    const char *think_start = strstr(input, "<think>");
+    if (think_start) {
+        const char *think_end = strstr(think_start, "</think>");
+        if (think_end) {
+            result = think_end + strlen("</think>");
+            // Skip leading whitespace after </think>
+            while (*result == ' ' || *result == '\n' || *result == '\r' || *result == '\t') {
+                result++;
+            }
+            // If nothing remains after stripping, use the content inside <think>
+            if (*result == '\0') {
+                result = think_start + strlen("<think>");
+                // Trim trailing </think> by computing length
+                size_t inner_len = (size_t)(think_end - result);
+                if (inner_len >= out_len) {
+                    inner_len = out_len - 1;
+                }
+                memcpy(out, result, inner_len);
+                out[inner_len] = '\0';
+                return;
+            }
+        }
+    }
+
+    strncpy(out, result, out_len - 1);
+    out[out_len - 1] = '\0';
+}
+
 // -----------------------------------------------------------------------------
 // OpenAI Format (OpenAI, OpenRouter, Ollama)
 // -----------------------------------------------------------------------------
@@ -423,6 +461,8 @@ static char *build_openai_request(
             cJSON_AddItemToObject(tool, "function", func);
             cJSON_AddItemToArray(tools_arr, tool);
         }
+
+        cJSON_AddStringToObject(root, "tool_choice", "auto");
     }
 
     char *json_str = cJSON_PrintUnformatted(root);
@@ -467,6 +507,15 @@ static bool parse_openai_response(
     if (content && cJSON_IsString(content)) {
         strncpy(text_out, content->valuestring, text_out_len - 1);
         text_out[text_out_len - 1] = '\0';
+    }
+
+    // Reasoning model fallback: content is null but reasoning_content exists
+    if (text_out[0] == '\0') {
+        cJSON *reasoning = cJSON_GetObjectItem(message, "reasoning_content");
+        if (reasoning && cJSON_IsString(reasoning)) {
+            ESP_LOGI(TAG, "Using reasoning_content fallback");
+            extract_reasoning_content(reasoning->valuestring, text_out, text_out_len);
+        }
     }
 
     // Check for tool_calls

@@ -6,7 +6,24 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
-- No unreleased changes yet.
+### Added
+- Reasoning model support: `reasoning_content` fallback in `parse_openai_response()` for models that return `content: null` (DeepSeek R1, QwQ, etc.), with `<think>` tag stripping.
+- `tool_choice: "auto"` added to OpenAI-format requests when tools are present, improving function-calling reliability across OpenRouter models.
+- Configurable system prompt suffix via NVS (`sys_prompt` key) with compiled default for zh-TW responses.
+- Three new built-in tools: `set_prompt`, `get_prompt`, `reset_prompt` for runtime prompt suffix management without reflashing.
+- Standalone NVS provisioning tool (`scripts/zclaw-nvs-tool.py`) with PyInstaller build script for distributing a single binary without Python/ESP-IDF dependencies.
+- System prompt now explicitly instructs models to invoke tools via function calls, not as text in replies.
+
+### Fixed
+- `zclaw-nvs-tool` NVS scanner now supports UTF-8 values (e.g. Chinese text in `sys_prompt`), previously filtered to ASCII-only.
+
+### Docs
+- Added `docs/nvs-tool.md` — zclaw-nvs-tool usage guide (read/write/config file/dry-run/flash encryption).
+- Added `docs/reasoning-models.md` — reasoning model fallback behavior, `<think>` stripping, and `tool_choice` details.
+- Added `docs/system-prompt-config.md` — configurable suffix architecture, NVS logic, tool descriptions, and security notes.
+
+### Tests
+- Added 6 host tests for reasoning fallback (`reasoning_fallback`, `reasoning_prefers_content`, `reasoning_strips_think`, `reasoning_think_only`) and tool_choice behavior (`tool_choice_present`, `tool_choice_absent_no_tools`).
 
 ## [2.10.1] - 2026-03-03
 

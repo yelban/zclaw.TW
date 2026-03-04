@@ -84,6 +84,7 @@ typedef enum {
     "Return plain text only. Do not use markdown, code fences, bullet lists, backticks, " \
     "bold, italics, or headings. " \
     "Use your tools to control hardware, remember things, and automate tasks. " \
+    "IMPORTANT: Always invoke tools via function calls. Never write tool names or JSON arguments as text in your reply. " \
     "When summarizing capabilities, prioritize custom tools, schedules, memory, and GPIO before optional i2c_scan details. " \
     "When asked for all or multiple GPIO states, prefer one gpio_read_all call instead of repeated gpio_read calls. " \
     "If users explicitly ask to view or change persona/tone settings, use " \
@@ -93,6 +94,9 @@ typedef enum {
     "When asked what is currently saved/set on the device, use tools to verify instead of guessing. " \
     "Users can create custom tools with create_tool. When you call a custom tool, " \
     "you'll receive an action to execute - carry it out using your built-in tools."
+
+#define DEFAULT_PROMPT_SUFFIX \
+    "Respond to users in Traditional Chinese (zh-TW) using Taiwan-standard terminology."
 
 // -----------------------------------------------------------------------------
 // GPIO tool safety range (configurable via Kconfig)

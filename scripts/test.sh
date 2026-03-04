@@ -88,6 +88,7 @@ run_host_tests() {
         ../../main/telegram_poll_policy.c \
         ../../main/agent.c \
         ../../main/tools_gpio.c \
+        ../../main/tools_prompt.c \
         ../../main/tools_system.c \
         $CJSON_LDFLAGS 2>&1 || {
         echo "Note: Failed to compile tests. Install cJSON:"

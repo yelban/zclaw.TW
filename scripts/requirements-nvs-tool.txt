@@ -1,0 +1,4 @@
+# Dependencies for zclaw-nvs-tool.py
+# Install with: pip install -r requirements-nvs-tool.txt
+esptool>=4.7
+esp-idf-nvs-partition-gen>=0.1.2

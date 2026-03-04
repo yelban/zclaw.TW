@@ -59,6 +59,20 @@ TOOL_ENTRY("reset_persona",
            "{\"type\":\"object\",\"properties\":{}}",
            tools_reset_persona_handler)
 
+// System Prompt
+TOOL_ENTRY("set_prompt",
+           "Set custom system prompt suffix (max 500 chars). Persists across reboots. Empty string disables all suffix including default.",
+           "{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\",\"description\":\"Custom prompt suffix text (empty to clear)\"}},\"required\":[\"text\"]}",
+           tools_set_prompt_handler)
+TOOL_ENTRY("get_prompt",
+           "Get current system prompt suffix.",
+           "{\"type\":\"object\",\"properties\":{}}",
+           tools_get_prompt_handler)
+TOOL_ENTRY("reset_prompt",
+           "Reset system prompt suffix to compiled default.",
+           "{\"type\":\"object\",\"properties\":{}}",
+           tools_reset_prompt_handler)
+
 // Cron/Scheduler
 TOOL_ENTRY("cron_set",
            "Create a scheduled task. Type 'periodic' runs every N minutes. Type 'daily' runs at a specific local time in the device timezone (see set_timezone/get_timezone). Type 'once' runs one time after N minutes.",

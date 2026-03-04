@@ -331,6 +331,27 @@ static const char *build_system_prompt(void)
         return SYSTEM_PROMPT;
     }
 
+    // Append custom prompt suffix (NVS or compiled default)
+    char custom[512] = {0};
+    bool has_custom = memory_get(NVS_KEY_SYS_PROMPT, custom, sizeof(custom));
+    const char *suffix = NULL;
+    if (!has_custom) {
+        suffix = DEFAULT_PROMPT_SUFFIX;  // Never set -> use compiled default
+    } else if (custom[0] != '\0') {
+        suffix = custom;                 // NVS has value -> use it
+    }
+    // has_custom && custom[0]=='\0' -> user cleared via set_prompt(""), append nothing
+
+    if (suffix) {
+        size_t used = (size_t)written;
+        int extra = snprintf(s_system_prompt_buf + used,
+                             sizeof(s_system_prompt_buf) - used,
+                             " %s", suffix);
+        if (extra > 0) {
+            written += extra;
+        }
+    }
+
     return s_system_prompt_buf;
 }
 

@@ -73,6 +73,8 @@ Non-interactive install:
 - GPIO read/write control with guardrails (including bulk `gpio_read_all`)
 - Persistent memory across reboots
 - Persona options: `neutral`, `friendly`, `technical`, `witty`
+- Configurable system prompt suffix via `set_prompt`/`reset_prompt` (persists across reboots, default: zh-TW)
+- Reasoning model support (DeepSeek R1, QwQ) with `reasoning_content` fallback and `<think>` tag stripping
 - Provider support for Anthropic, OpenAI, OpenRouter, and Ollama (custom endpoint)
 
 ## Hardware
@@ -125,6 +127,8 @@ More details in the [Local Dev & Hacking guide](https://zclaw.dev/local-dev.html
 - `./scripts/benchmark.sh` - Benchmark relay/serial latency
 - `./scripts/test.sh` - Run host/device test flows
 - `./scripts/test-api.sh` - Run live provider API checks (manual/local)
+- `./scripts/zclaw-nvs-tool.py` - Standalone NVS read/write tool (no ESP-IDF needed; see `docs/nvs-tool.md`)
+- `./scripts/build-nvs-tool.sh` - Package zclaw-nvs-tool into a single binary via PyInstaller
 
 </details>
 
