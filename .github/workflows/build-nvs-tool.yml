@@ -17,9 +17,6 @@ jobs:
           - os: macos-latest
             artifact: zclaw-nvs-tool-macos-arm64
             binary: zclaw-nvs-tool
-          - os: macos-13
-            artifact: zclaw-nvs-tool-macos-x64
-            binary: zclaw-nvs-tool
           - os: ubuntu-latest
             artifact: zclaw-nvs-tool-linux-x64
             binary: zclaw-nvs-tool
