@@ -1,0 +1,96 @@
+name: Build NVS Tool
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: zclaw-nvs-tool-macos-arm64
+            binary: zclaw-nvs-tool
+          - os: macos-13
+            artifact: zclaw-nvs-tool-macos-x64
+            binary: zclaw-nvs-tool
+          - os: ubuntu-latest
+            artifact: zclaw-nvs-tool-linux-x64
+            binary: zclaw-nvs-tool
+          - os: windows-latest
+            artifact: zclaw-nvs-tool-windows-x64
+            binary: zclaw-nvs-tool.exe
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install "esptool>=4.7" "esp-idf-nvs-partition-gen>=0.1.2" "pyinstaller>=6.0"
+
+      - name: Build binary
+        run: |
+          pyinstaller \
+            --onefile \
+            --name "zclaw-nvs-tool" \
+            --distpath dist \
+            --workpath build/nvs-tool \
+            --specpath build/nvs-tool \
+            --collect-data esptool \
+            --collect-data espefuse \
+            --clean \
+            --noconfirm \
+            scripts/zclaw-nvs-tool.py
+        shell: bash
+
+      - name: Smoke test
+        run: ./dist/${{ matrix.binary }} --help
+        shell: bash
+
+      - name: Rename artifact
+        run: |
+          cp "dist/${{ matrix.binary }}" "dist/${{ matrix.artifact }}${{ contains(matrix.binary, '.exe') && '.exe' || '' }}"
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}*
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Collect binaries
+        run: |
+          mkdir -p release
+          find artifacts -type f | while read f; do
+            cp "$f" "release/$(basename "$f")"
+          done
+          ls -lh release/
+
+      - name: Attach to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
