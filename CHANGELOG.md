@@ -4,6 +4,29 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning.
 
+## [2.10.2-tw.2] - 2026-03-05
+
+### Added
+- Telegram voice message → ASR transcription: detect voice in poll loop, download OGG, POST to Whisper-compatible API, route transcribed text through agent pipeline.
+- NVS keys `asr_api_url`, `asr_api_key`, `asr_model` for configurable ASR endpoint (default: OpenAI Whisper).
+- ASR API key fallback: uses LLM `api_key` when no dedicated `asr_api_key` is set.
+- `--asr-api-url`, `--asr-api-key`, `--asr-model` flags in `zclaw-nvs-tool`, `provision.sh`, and `provision-dev.sh`.
+- `scripts/serial-log.sh` — non-interactive serial log reader using pyserial (works in Claude Code and scripts).
+- Inject persisted user memories (`u_*` NVS keys) into agent system prompt for cross-reboot recall.
+
+### Fixed
+- ASR API key buffer undersized (128 → 256 bytes) causing `ESP_ERR_NVS_INVALID_LENGTH` for OpenAI project keys (`sk-proj-...`, 160-200+ chars).
+- OGG download buffer now dynamically allocated from Telegram `file_size` instead of fixed 128 KB, preventing `ESP_ERR_NO_MEM` on boards without PSRAM enabled.
+- `asr_api_key` added to `zclaw-nvs-tool` sensitive key masking.
+
+### Docs
+- Added `docs/telegram-voice-asr.md` — voice ASR architecture, NVS config, known issues and fixes.
+- Updated `docs/nvs-tool.md` — ASR provisioning examples and `.env` format.
+- Added `docs/CODEBASE_MAP.md`, `docs/zclaw.TW.md`, `docs/zclaw.TW_SPEC.md`.
+
+### Tests
+- 5 host tests for voice ASR: multipart body construction, getFile/ASR JSON parsing, empty response, unconfigured state.
+
 ## [2.10.2-tw.1] - 2026-03-05
 
 ### Added
