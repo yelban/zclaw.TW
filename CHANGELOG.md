@@ -28,6 +28,14 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ### Tests
 - Added 6 host tests for reasoning fallback (`reasoning_fallback`, `reasoning_prefers_content`, `reasoning_strips_think`, `reasoning_think_only`) and tool_choice behavior (`tool_choice_present`, `tool_choice_absent_no_tools`).
 
+## [2.10.2] - 2026-03-04
+
+### Fixed
+- OpenAI-compatible API harness calls now auto-insert `SYSTEM_PROMPT` as a leading `system` message when none is present, aligning OpenRouter/OpenAI behavior with Anthropic's explicit system-prompt wiring.
+
+### Tests
+- Added host payload-composition coverage for `call_api` to verify system-message insertion when missing and no duplication when a custom leading system message already exists.
+
 ## [2.10.1] - 2026-03-03
 
 ### Fixed

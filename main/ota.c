@@ -8,7 +8,7 @@ static bool s_pending_verify = false;
 
 // Current firmware version (set at compile time)
 #ifndef ZCLAW_VERSION
-#define ZCLAW_VERSION "2.5.3"
+#define ZCLAW_VERSION "dev"
 #endif
 
 esp_err_t ota_init(void)

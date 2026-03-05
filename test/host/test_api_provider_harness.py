@@ -5,8 +5,11 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+from types import SimpleNamespace
 import unittest
 from pathlib import Path
+from typing import Any
+from unittest.mock import Mock, patch
 
 
 TEST_DIR = Path(__file__).resolve().parent
@@ -108,6 +111,56 @@ class ProviderHarnessTests(unittest.TestCase):
         _, tool_uses, done, _ = provider_harness._extract_openai_round(response)
         self.assertFalse(done)
         self.assertEqual(tool_uses[0]["input"], {})
+
+    def test_call_api_openai_inserts_system_message_when_missing(self) -> None:
+        provider = provider_harness.PROVIDERS["openai"]
+        messages = [{"role": "user", "content": "Hello"}]
+        payload: dict[str, Any] = {}
+
+        def fake_post(url: str, headers: dict[str, str], json: dict[str, Any], timeout: int) -> Mock:
+            payload["url"] = url
+            payload["headers"] = headers
+            payload["json"] = json
+            payload["timeout"] = timeout
+            response = Mock()
+            response.raise_for_status.return_value = None
+            response.json.return_value = {"ok": True}
+            return response
+
+        with patch.object(provider_harness, "httpx", SimpleNamespace(post=fake_post)):
+            result = provider_harness.call_api(provider, messages, "test-key", "gpt-4o-mini", user_tools=[])
+
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(payload["url"], provider.api_url)
+        self.assertEqual(payload["timeout"], 30)
+        request_json = payload["json"]
+        self.assertEqual(request_json["messages"][0], {"role": "system", "content": provider_harness.SYSTEM_PROMPT})
+        self.assertEqual(request_json["messages"][1], {"role": "user", "content": "Hello"})
+        self.assertEqual(messages, [{"role": "user", "content": "Hello"}])
+
+    def test_call_api_openai_keeps_existing_system_message(self) -> None:
+        provider = provider_harness.PROVIDERS["openai"]
+        messages = [
+            {"role": "system", "content": "custom system prompt"},
+            {"role": "user", "content": "Hello"},
+        ]
+        payload: dict[str, Any] = {}
+
+        def fake_post(url: str, headers: dict[str, str], json: dict[str, Any], timeout: int) -> Mock:
+            payload["url"] = url
+            payload["headers"] = headers
+            payload["json"] = json
+            payload["timeout"] = timeout
+            response = Mock()
+            response.raise_for_status.return_value = None
+            response.json.return_value = {"ok": True}
+            return response
+
+        with patch.object(provider_harness, "httpx", SimpleNamespace(post=fake_post)):
+            provider_harness.call_api(provider, messages, "test-key", "gpt-4o-mini", user_tools=[])
+
+        request_json = payload["json"]
+        self.assertEqual(request_json["messages"], messages)
 
 
 if __name__ == "__main__":
