@@ -10,6 +10,19 @@ Standalone NVS provisioning tool for zclaw devices. Reads and writes WiFi, LLM, 
 
 Produces `dist/zclaw-nvs-tool` (macOS/Linux) via PyInstaller. Requires `uv`.
 
+### Pre-built binaries
+
+Pre-built binaries are attached to each [GitHub Release](https://github.com/yelban/zclaw.TW/releases):
+
+| Platform | Asset |
+|----------|-------|
+| macOS Apple Silicon | `zclaw-nvs-tool-macos-arm64` |
+| macOS Intel | `zclaw-nvs-tool-macos-x64` |
+| Linux x64 | `zclaw-nvs-tool-linux-x64` |
+| Windows x64 | `zclaw-nvs-tool-windows-x64.exe` |
+
+Download and run directly — no Python or ESP-IDF required.
+
 ## Usage
 
 ### Read current NVS

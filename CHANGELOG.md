@@ -22,6 +22,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Added `docs/reasoning-models.md` — reasoning model fallback behavior, `<think>` stripping, and `tool_choice` details.
 - Added `docs/system-prompt-config.md` — configurable suffix architecture, NVS logic, tool descriptions, and security notes.
 
+### CI
+- Added GitHub Actions workflow (`.github/workflows/build-nvs-tool.yml`) to build `zclaw-nvs-tool` binaries for macOS arm64, macOS x64 (Rosetta), Linux x64, and Windows x64 on tag push, with automatic attachment to GitHub Releases.
+
 ### Tests
 - Added 6 host tests for reasoning fallback (`reasoning_fallback`, `reasoning_prefers_content`, `reasoning_strips_think`, `reasoning_think_only`) and tool_choice behavior (`tool_choice_present`, `tool_choice_absent_no_tools`).
 
