@@ -31,7 +31,9 @@ Download and run directly — no Python or ESP-IDF required.
 ./dist/zclaw-nvs-tool --port /dev/cu.usbmodem1101 --read
 ```
 
-Displays all known keys: `wifi_ssid`, `wifi_pass`, `llm_backend`, `llm_model`, `api_key`, `llm_api_url`, `tg_token`, `tg_chat_id`, `tg_chat_ids`, `timezone`, `persona`, `sys_prompt`. Sensitive values are masked.
+Displays all known system keys: `wifi_ssid`, `wifi_pass`, `llm_backend`, `llm_model`, `api_key`, `llm_api_url`, `tg_token`, `tg_chat_id`, `tg_chat_ids`, `timezone`, `persona`, `sys_prompt`. Sensitive values are masked.
+
+User memories (`u_*` keys created via the `memory_set` tool) are shown in a separate **User Memories** section.
 
 ### Write credentials (CLI)
 
