@@ -7,7 +7,9 @@
 #include "messages.h"
 #include "ratelimit.h"
 #include "memory.h"
+#include "memory_keys.h"
 #include "nvs_keys.h"
+#include "nvs_flash.h"
 #include "cJSON.h"
 #include "esp_timer.h"
 #include "esp_log.h"
@@ -349,6 +351,53 @@ static const char *build_system_prompt(void)
                              " %s", suffix);
         if (extra > 0) {
             written += extra;
+        }
+    }
+
+    // Inject persisted user memories so the model recalls them after reboot
+    {
+        nvs_handle_t handle;
+        if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) == ESP_OK) {
+            nvs_iterator_t it = NULL;
+            esp_err_t err = nvs_entry_find_in_handle(handle, NVS_TYPE_STR, &it);
+            bool header_written = false;
+
+            while (err == ESP_OK && it != NULL) {
+                nvs_entry_info_t info;
+                nvs_entry_info(it, &info);
+
+                if (memory_keys_is_user_key(info.key)) {
+                    char val[128] = {0};
+                    if (memory_get(info.key, val, sizeof(val)) && val[0] != '\0') {
+                        size_t used = (size_t)written;
+                        size_t remaining = sizeof(s_system_prompt_buf) - used;
+                        if (remaining < 40) break;  // stop if buffer nearly full
+
+                        int n;
+                        if (!header_written) {
+                            n = snprintf(s_system_prompt_buf + used, remaining,
+                                         " [Stored memories:");
+                            if (n > 0) { written += n; used += (size_t)n; remaining -= (size_t)n; }
+                            header_written = true;
+                        }
+                        n = snprintf(s_system_prompt_buf + used, remaining,
+                                     " %s=%s;", info.key, val);
+                        if (n > 0) written += n;
+                    }
+                }
+                err = nvs_entry_next(&it);
+            }
+
+            if (it) nvs_release_iterator(it);
+            nvs_close(handle);
+
+            if (header_written) {
+                size_t used = (size_t)written;
+                size_t remaining = sizeof(s_system_prompt_buf) - used;
+                int n = snprintf(s_system_prompt_buf + used, remaining,
+                                 "] Use these memories naturally in responses.");
+                if (n > 0) written += n;
+            }
         }
     }
 
