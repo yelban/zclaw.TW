@@ -17,6 +17,8 @@ typedef int esp_err_t;
 #define ESP_ERR_NO_MEM  0x101
 #define ESP_ERR_INVALID_ARG 0x102
 #define ESP_ERR_NOT_FOUND 0x105
+#define ESP_ERR_INVALID_STATE 0x103
+#define ESP_ERR_INVALID_RESPONSE 0x108
 
 // Mock logging
 #define ESP_LOGE(tag, fmt, ...) printf("[E][%s] " fmt "\n", tag, ##__VA_ARGS__)

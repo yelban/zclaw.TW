@@ -73,6 +73,12 @@ def build_nvs_csv(cfg: dict) -> str:
         lines.append(f"timezone,data,string,{csv_escape(cfg['timezone'])}")
     if cfg.get("persona"):
         lines.append(f"persona,data,string,{csv_escape(cfg['persona'])}")
+    if cfg.get("asr_api_url"):
+        lines.append(f"asr_api_url,data,string,{csv_escape(cfg['asr_api_url'])}")
+    if cfg.get("asr_api_key"):
+        lines.append(f"asr_api_key,data,string,{csv_escape(cfg['asr_api_key'])}")
+    if cfg.get("asr_model"):
+        lines.append(f"asr_model,data,string,{csv_escape(cfg['asr_model'])}")
     return "\n".join(lines) + "\n"
 
 
@@ -112,6 +118,9 @@ _ENV_MAP = {
     "TG_CHAT_IDS": "tg_chat_ids",
     "TIMEZONE":    "timezone",
     "PERSONA":     "persona",
+    "ASR_API_URL": "asr_api_url",
+    "ASR_API_KEY": "asr_api_key",
+    "ASR_MODEL":   "asr_model",
 }
 
 
@@ -197,8 +206,11 @@ _KNOWN_KEYS = [
     "timezone",
     "persona",
     "sys_prompt",
+    "asr_api_url",
+    "asr_api_key",
+    "asr_model",
 ]
-_SENSITIVE_KEYS = {"wifi_pass", "api_key", "tg_token"}
+_SENSITIVE_KEYS = {"wifi_pass", "api_key", "tg_token", "asr_api_key"}
 
 
 def read_nvs_partition(port: str) -> bytes:
@@ -208,7 +220,7 @@ def read_nvs_partition(port: str) -> bytes:
     with tempfile.NamedTemporaryFile(suffix=".bin", delete=False) as f:
         tmp = f.name
     try:
-        esptool.main(["--port", port, "read-flash", NVS_OFFSET, hex(NVS_SIZE), tmp])
+        esptool.main(["--port", port, "read_flash", NVS_OFFSET, hex(NVS_SIZE), tmp])
         with open(tmp, "rb") as f:
             return f.read()
     finally:
@@ -247,7 +259,7 @@ def _scan_nvs_strings(data: bytes) -> dict:
             key = entry[8:24].rstrip(b"\x00").decode("ascii")
         except UnicodeDecodeError:
             continue
-        if key not in _KNOWN_KEYS:
+        if key not in _KNOWN_KEYS and not key.startswith("u_"):
             continue
 
         span = entry[2]
@@ -290,6 +302,12 @@ def cmd_read_nvs(port: str) -> int:
             continue
         display = _mask(val) if key in _SENSITIVE_KEYS else val
         print(f"  {key:<14}: {display}")
+
+    user_keys = sorted(k for k in found if k.startswith("u_"))
+    if user_keys:
+        print("\n=== User Memories ===")
+        for key in user_keys:
+            print(f"  {key:<14}: {found[key]}")
     print()
     return 0
 
@@ -366,7 +384,7 @@ def _mask(val: str) -> str:
 
 
 def show_config(cfg: dict, port: str) -> None:
-    SENSITIVE = {"api_key", "wifi_pass", "tg_token"}
+    SENSITIVE = {"api_key", "wifi_pass", "tg_token", "asr_api_key"}
     print("\n=== Resolved Configuration ===")
     if port:
         print(f"  port        : {port}")
@@ -401,6 +419,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--tg-token",  metavar="TOKEN",   help="Telegram bot token (optional)")
     p.add_argument("--tg-chat-ids", metavar="IDS",  help="Telegram allowed chat IDs, comma-separated (e.g. 123,456); supports multiple channels")
     p.add_argument("--timezone",  metavar="TZ",      help="Timezone string (optional)")
+    p.add_argument("--asr-api-url", metavar="URL",   help="ASR endpoint URL (default: OpenAI Whisper)")
+    p.add_argument("--asr-api-key", metavar="KEY",   help="ASR API key (default: uses LLM api_key)")
+    p.add_argument("--asr-model",   metavar="MODEL", help="ASR model name (default: whisper-1)")
     p.add_argument("--read",      action="store_true",
                    help="Read and display current NVS from device (requires --port)")
     p.add_argument("--dry-run",   action="store_true",
@@ -438,6 +459,9 @@ def main() -> int:
         "tg_token":    args.tg_token or "",
         "tg_chat_ids": args.tg_chat_ids or "",
         "timezone":    args.timezone or "",
+        "asr_api_url": args.asr_api_url or "",
+        "asr_api_key": args.asr_api_key or "",
+        "asr_model":   args.asr_model or "",
     }
 
     # Overlay .env config file (CLI args take precedence)

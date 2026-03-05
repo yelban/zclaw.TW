@@ -16,6 +16,11 @@
 #define NVS_KEY_PERSONA      "persona"
 #define NVS_KEY_SYS_PROMPT   "sys_prompt"
 
+// ASR (speech-to-text) keys.
+#define NVS_KEY_ASR_API_URL  "asr_api_url"
+#define NVS_KEY_ASR_API_KEY  "asr_api_key"
+#define NVS_KEY_ASR_MODEL    "asr_model"
+
 // Rate-limit bookkeeping keys.
 #define NVS_KEY_RL_DAILY     "rl_daily"
 #define NVS_KEY_RL_DAY       "rl_day"

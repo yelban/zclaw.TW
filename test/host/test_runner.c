@@ -22,6 +22,7 @@ extern int test_builtin_tools_registry_all(void);
 extern int test_tools_system_diag_all(void);
 extern int test_llm_auth_all(void);
 extern int test_wifi_credentials_all(void);
+extern int test_telegram_voice_all(void);
 
 int main(int argc, char *argv[])
 {
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
     failures += test_tools_system_diag_all();
     failures += test_llm_auth_all();
     failures += test_wifi_credentials_all();
+    failures += test_telegram_voice_all();
 
     printf("\n===================\n");
     if (failures == 0) {

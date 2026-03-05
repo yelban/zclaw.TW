@@ -65,6 +65,7 @@ run_host_tests() {
         test_tools_system_diag.c \
         test_llm_auth.c \
         test_wifi_credentials.c \
+        test_telegram_voice.c \
         test_runner.c \
         mock_esp.c \
         mock_memory.c \
@@ -86,6 +87,7 @@ run_host_tests() {
         ../../main/telegram_token.c \
         ../../main/telegram_chat_ids.c \
         ../../main/telegram_poll_policy.c \
+        ../../main/telegram_voice.c \
         ../../main/agent.c \
         ../../main/tools_gpio.c \
         ../../main/tools_prompt.c \

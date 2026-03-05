@@ -157,6 +157,17 @@ typedef enum {
 #define MESSAGE_REPLAY_COOLDOWN_MS 20000 // Suppress repeated identical non-command bursts
 
 // -----------------------------------------------------------------------------
+// ASR (Speech-to-Text)
+// -----------------------------------------------------------------------------
+#define ASR_DEFAULT_API_URL     "https://api.openai.com/v1/audio/transcriptions"
+#define ASR_DEFAULT_MODEL       "whisper-1"
+#define ASR_DEFAULT_LANGUAGE    "zh"
+#define ASR_DEFAULT_PROMPT      "以下是繁體中文語音轉錄。"
+#define ASR_MAX_VOICE_SIZE      (128 * 1024)   // 128 KB max OGG
+#define ASR_HTTP_TIMEOUT_MS     30000
+#define ASR_RESPONSE_BUF_SIZE   1024
+
+// -----------------------------------------------------------------------------
 // Cron / Scheduler
 // -----------------------------------------------------------------------------
 #define CRON_CHECK_INTERVAL_MS  10000   // Check schedules every 10 seconds

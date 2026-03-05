@@ -1,4 +1,5 @@
 #include "telegram.h"
+#include "telegram_voice.h"
 #include "config.h"
 #include "messages.h"
 #include "memory.h"
@@ -380,6 +381,8 @@ esp_err_t telegram_init(void)
         }
     }
 
+    telegram_voice_init();
+
     ESP_LOGI(TAG, "Telegram initialized");
     return ESP_OK;
 }
@@ -727,6 +730,55 @@ static esp_err_t telegram_poll(void)
 
                 if (xQueueSend(s_input_queue, &msg, pdMS_TO_TICKS(100)) != pdTRUE) {
                     ESP_LOGW(TAG, "Input queue full");
+                }
+            }
+        } else if (chat && telegram_voice_is_configured()) {
+            // Voice message handling: transcribe via ASR and enqueue as text.
+            cJSON *voice = cJSON_GetObjectItem(message, "voice");
+            if (voice && cJSON_IsObject(voice)) {
+                cJSON *chat_id = cJSON_GetObjectItem(chat, "id");
+                if (chat_id && cJSON_IsNumber(chat_id)) {
+                    int64_t incoming_chat_id = (int64_t)chat_id->valuedouble;
+
+                    if (s_allowed_chat_count == 0 || !is_chat_authorized(incoming_chat_id)) {
+                        ESP_LOGW(TAG, "Rejected voice from unauthorized chat");
+                        continue;
+                    }
+
+                    cJSON *file_size = cJSON_GetObjectItem(voice, "file_size");
+                    if (file_size && cJSON_IsNumber(file_size) &&
+                        (int)file_size->valuedouble > ASR_MAX_VOICE_SIZE) {
+                        ESP_LOGW(TAG, "Voice file too large (%d bytes), skipping",
+                                 (int)file_size->valuedouble);
+                        continue;
+                    }
+
+                    cJSON *file_id = cJSON_GetObjectItem(voice, "file_id");
+                    if (file_id && cJSON_IsString(file_id)) {
+                        ESP_LOGI(TAG, "Voice message received, transcribing...");
+
+                        char transcription[CHANNEL_RX_BUF_SIZE];
+                        esp_err_t asr_err = telegram_voice_transcribe(
+                            s_bot_token, file_id->valuestring,
+                            transcription, sizeof(transcription));
+
+                        if (asr_err == ESP_OK && transcription[0] != '\0') {
+                            channel_msg_t msg;
+                            strncpy(msg.text, transcription, CHANNEL_RX_BUF_SIZE - 1);
+                            msg.text[CHANNEL_RX_BUF_SIZE - 1] = '\0';
+                            msg.source = MSG_SOURCE_TELEGRAM;
+                            msg.chat_id = incoming_chat_id;
+
+                            ESP_LOGI(TAG, "Voice transcribed: %s", msg.text);
+
+                            if (xQueueSend(s_input_queue, &msg, pdMS_TO_TICKS(100)) != pdTRUE) {
+                                ESP_LOGW(TAG, "Input queue full");
+                            }
+                        } else {
+                            ESP_LOGW(TAG, "Voice transcription failed: %s",
+                                     esp_err_to_name(asr_err));
+                        }
+                    }
                 }
             }
         }

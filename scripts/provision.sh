@@ -14,6 +14,8 @@ API_KEY=""
 API_URL=""
 TG_TOKEN=""
 TG_CHAT_IDS=""
+ASR_API_URL=""
+ASR_API_KEY=""
 ASSUME_YES=false
 VERIFY_API_KEY=true
 PRINT_DETECTED_SSID=false
@@ -36,6 +38,8 @@ Options:
   --tg-token <token>        Telegram bot token (optional)
   --tg-chat-id <id[,id...]> Telegram chat ID allowlist (optional)
   --tg-chat-ids <list>      Alias of --tg-chat-id
+  --asr-api-url <url>       ASR endpoint URL (default: OpenAI Whisper)
+  --asr-api-key <key>       ASR API key (default: uses LLM api_key)
   --yes                     Non-interactive (requires --api-key except ollama; SSID auto-detect if possible)
   --skip-api-check          Skip live API key verification step
   --print-detected-ssid     Print detected host WiFi SSID and exit (test/troubleshooting helper)
@@ -850,6 +854,22 @@ while [ $# -gt 0 ]; do
         --tg-chat-ids=*)
             TG_CHAT_IDS="${1#*=}"
             ;;
+        --asr-api-url)
+            shift
+            [ $# -gt 0 ] || { echo "Error: --asr-api-url requires a value"; exit 1; }
+            ASR_API_URL="$1"
+            ;;
+        --asr-api-url=*)
+            ASR_API_URL="${1#*=}"
+            ;;
+        --asr-api-key)
+            shift
+            [ $# -gt 0 ] || { echo "Error: --asr-api-key requires a value"; exit 1; }
+            ASR_API_KEY="$1"
+            ;;
+        --asr-api-key=*)
+            ASR_API_KEY="${1#*=}"
+            ;;
         --yes)
             ASSUME_YES=true
             ;;
@@ -1135,6 +1155,13 @@ trap 'rm -rf "$tmpdir"' EXIT
         PRIMARY_TG_CHAT_ID="$(first_telegram_chat_id "$TG_CHAT_IDS")"
         printf "tg_chat_id,data,string,%s\n" "$(csv_escape "$PRIMARY_TG_CHAT_ID")"
         printf "tg_chat_ids,data,string,%s\n" "$(csv_escape "$TG_CHAT_IDS")"
+    fi
+
+    if [ -n "$ASR_API_URL" ]; then
+        printf "asr_api_url,data,string,%s\n" "$(csv_escape "$ASR_API_URL")"
+    fi
+    if [ -n "$ASR_API_KEY" ]; then
+        printf "asr_api_key,data,string,%s\n" "$(csv_escape "$ASR_API_KEY")"
     fi
 } > "$csv_file"
 

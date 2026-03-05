@@ -17,6 +17,7 @@ idf_component_register(
         "memory.c"
         "json_util.c"
         "telegram.c"
+        "telegram_voice.c"
         "telegram_poll_policy.c"
         "telegram_chat_ids.c"
         "telegram_token.c"

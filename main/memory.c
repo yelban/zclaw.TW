@@ -134,6 +134,7 @@ bool memory_get(const char *key, char *value, size_t max_len)
         ESP_LOGI(TAG, "Retrieved: %s = %s", key, log_value_for_key(key, value));
         return true;
     }
+    ESP_LOGD(TAG, "nvs_get_str('%s') failed: %s (0x%x)", key, esp_err_to_name(err), err);
     return false;
 }
 

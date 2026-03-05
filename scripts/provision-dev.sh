@@ -18,6 +18,8 @@ API_KEY_OVERRIDE=""
 API_URL_OVERRIDE=""
 TG_TOKEN_OVERRIDE=""
 TG_CHAT_IDS_OVERRIDE=""
+ASR_API_URL_OVERRIDE=""
+ASR_API_KEY_OVERRIDE=""
 SHOW_CONFIG=false
 WRITE_TEMPLATE=false
 SKIP_API_CHECK=false
@@ -45,6 +47,8 @@ Overrides:
   --tg-token <token>
   --tg-chat-id <id[,id...]>
   --tg-chat-ids <list>     Alias of --tg-chat-id
+  --asr-api-url <url>      ASR endpoint URL
+  --asr-api-key <key>      ASR API key
 
 Examples:
   $0 --write-template
@@ -81,6 +85,10 @@ ZCLAW_API_KEY=
 ZCLAW_TG_TOKEN=
 ZCLAW_TG_CHAT_ID=
 ZCLAW_TG_CHAT_IDS=
+
+# Optional ASR (voice transcription) credentials:
+ZCLAW_ASR_API_URL=
+ZCLAW_ASR_API_KEY=
 EOF
     chmod 600 "$ENV_FILE"
     echo "Wrote template: $ENV_FILE"
@@ -207,7 +215,7 @@ print_redacted_command() {
             continue
         fi
         case "$arg" in
-            --api-key|--tg-token|--pass)
+            --api-key|--tg-token|--pass|--asr-api-key)
                 printf " %q" "$arg"
                 next_secret=true
                 ;;
@@ -277,6 +285,16 @@ while [ $# -gt 0 ]; do
             TG_CHAT_IDS_OVERRIDE="$2"
             shift 2
             ;;
+        --asr-api-url)
+            [ $# -ge 2 ] || { echo "Error: --asr-api-url requires a value."; exit 1; }
+            ASR_API_URL_OVERRIDE="$2"
+            shift 2
+            ;;
+        --asr-api-key)
+            [ $# -ge 2 ] || { echo "Error: --asr-api-key requires a value."; exit 1; }
+            ASR_API_KEY_OVERRIDE="$2"
+            shift 2
+            ;;
         --show-config)
             SHOW_CONFIG=true
             shift
@@ -332,6 +350,8 @@ MODEL="${MODEL_OVERRIDE:-${ZCLAW_MODEL:-}}"
 API_URL="${API_URL_OVERRIDE:-${ZCLAW_API_URL:-}}"
 TG_TOKEN="${TG_TOKEN_OVERRIDE:-${ZCLAW_TG_TOKEN:-}}"
 TG_CHAT_IDS="${TG_CHAT_IDS_OVERRIDE:-${ZCLAW_TG_CHAT_IDS:-${ZCLAW_TG_CHAT_ID:-}}}"
+ASR_API_URL="${ASR_API_URL_OVERRIDE:-${ZCLAW_ASR_API_URL:-}}"
+ASR_API_KEY="${ASR_API_KEY_OVERRIDE:-${ZCLAW_ASR_API_KEY:-}}"
 
 if [ "$PASS_OVERRIDE_SET" = true ]; then
     WIFI_PASS="$PASS_OVERRIDE"
@@ -375,6 +395,8 @@ if [ "$SHOW_CONFIG" = true ]; then
     echo "  Telegram bot ID: $BOT_ID (safe identifier)"
     echo "  Telegram token: $(mask_secret "$TG_TOKEN")"
     echo "  Telegram chat ID(s): $(mask_chat_id "$TG_CHAT_IDS")"
+    echo "  ASR API URL: ${ASR_API_URL:-<default>}"
+    echo "  ASR API key: $(mask_secret "$ASR_API_KEY")"
 fi
 
 PROVISION_ARGS=(--yes)
@@ -402,6 +424,12 @@ if [ -n "$TG_TOKEN" ]; then
 fi
 if [ -n "$TG_CHAT_IDS" ]; then
     PROVISION_ARGS+=(--tg-chat-id "$TG_CHAT_IDS")
+fi
+if [ -n "$ASR_API_URL" ]; then
+    PROVISION_ARGS+=(--asr-api-url "$ASR_API_URL")
+fi
+if [ -n "$ASR_API_KEY" ]; then
+    PROVISION_ARGS+=(--asr-api-key "$ASR_API_KEY")
 fi
 if [ "$SKIP_API_CHECK" = true ]; then
     PROVISION_ARGS+=(--skip-api-check)
