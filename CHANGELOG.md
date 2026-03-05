@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning.
 
-## [2.11.0] - 2026-03-05
+## [2.10.2-tw.1] - 2026-03-05
 
 ### Added
 - Reasoning model support: `reasoning_content` fallback in `parse_openai_response()` for models that return `content: null` (DeepSeek R1, QwQ, etc.), with `<think>` tag stripping.
