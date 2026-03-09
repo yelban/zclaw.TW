@@ -57,7 +57,7 @@ typedef enum {
 
 #define LLM_DEFAULT_MODEL_ANTHROPIC   "claude-sonnet-4-5"
 #define LLM_DEFAULT_MODEL_OPENAI      "gpt-5.2"
-#define LLM_DEFAULT_MODEL_OPENROUTER  "minimax/minimax-m2.5"
+#define LLM_DEFAULT_MODEL_OPENROUTER  "google/gemini-2.0-flash-001"
 #define LLM_DEFAULT_MODEL_OLLAMA      "qwen3:8b"
 
 #define LLM_API_KEY_MAX_LEN       511
@@ -95,8 +95,11 @@ typedef enum {
     "Users can create custom tools with create_tool. When you call a custom tool, " \
     "you'll receive an action to execute - carry it out using your built-in tools."
 
+#define DEV_ALIASES_MAX_LEN  256
+
 #define DEFAULT_PROMPT_SUFFIX \
-    "Respond to users in Traditional Chinese (zh-TW) using Taiwan-standard terminology."
+    "Respond to users in Traditional Chinese (zh-TW) using Taiwan-standard terminology. " \
+    "When users say '開關 N' or 'switch N', treat it as GPIO pin N."
 
 // -----------------------------------------------------------------------------
 // GPIO tool safety range (configurable via Kconfig)

@@ -21,6 +21,9 @@
 #define NVS_KEY_ASR_API_KEY  "asr_api_key"
 #define NVS_KEY_ASR_MODEL    "asr_model"
 
+// Device aliases (GPIO name mapping).
+#define NVS_KEY_DEV_ALIASES  "dev_aliases"
+
 // Rate-limit bookkeeping keys.
 #define NVS_KEY_RL_DAILY     "rl_daily"
 #define NVS_KEY_RL_DAY       "rl_day"

@@ -209,6 +209,7 @@ _KNOWN_KEYS = [
     "asr_api_url",
     "asr_api_key",
     "asr_model",
+    "dev_aliases",
 ]
 _SENSITIVE_KEYS = {"wifi_pass", "api_key", "tg_token", "asr_api_key"}
 

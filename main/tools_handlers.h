@@ -39,6 +39,11 @@ bool tools_set_prompt_handler(const cJSON *input, char *result, size_t result_le
 bool tools_get_prompt_handler(const cJSON *input, char *result, size_t result_len);
 bool tools_reset_prompt_handler(const cJSON *input, char *result, size_t result_len);
 
+// Device Aliases
+bool tools_set_alias_handler(const cJSON *input, char *result, size_t result_len);
+bool tools_get_aliases_handler(const cJSON *input, char *result, size_t result_len);
+bool tools_delete_alias_handler(const cJSON *input, char *result, size_t result_len);
+
 // System / User tools
 bool tools_get_version_handler(const cJSON *input, char *result, size_t result_len);
 bool tools_get_health_handler(const cJSON *input, char *result, size_t result_len);

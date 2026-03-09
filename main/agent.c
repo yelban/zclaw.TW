@@ -401,6 +401,22 @@ static const char *build_system_prompt(void)
         }
     }
 
+    // Inject device aliases so the model maps alias names to gpio_write calls
+    {
+        char aliases[DEV_ALIASES_MAX_LEN] = {0};
+        if (memory_get(NVS_KEY_DEV_ALIASES, aliases, sizeof(aliases)) && aliases[0]) {
+            size_t used = (size_t)written;
+            size_t remaining = sizeof(s_system_prompt_buf) - used;
+            int n = snprintf(s_system_prompt_buf + used, remaining,
+                " [Device aliases: %s] "
+                "Format: name:pin:state or name:pin. "
+                "When user says an alias, call gpio_write with mapped pin/state. "
+                "name:pin without state: infer on/off from context.",
+                aliases);
+            if (n > 0) written += n;
+        }
+    }
+
     return s_system_prompt_buf;
 }
 

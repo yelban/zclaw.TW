@@ -30,6 +30,7 @@ idf_component_register(
         "ratelimit.c"
         "ota.c"
         "boot_guard.c"
+        "tools_alias.c"
         "user_tools.c"
         "wifi_credentials.c"
     INCLUDE_DIRS "."
