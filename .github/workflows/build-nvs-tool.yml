@@ -18,6 +18,11 @@ jobs:
           - os: macos-latest
             artifact: zclaw-nvs-tool-macos-arm64
             binary: zclaw-nvs-tool
+          - os: macos-latest
+            artifact: zclaw-nvs-tool-macos-x64
+            binary: zclaw-nvs-tool
+            python_arch: x64
+            arch_prefix: arch -x86_64
           - os: ubuntu-latest
             artifact: zclaw-nvs-tool-linux-x64
             binary: zclaw-nvs-tool
@@ -30,19 +35,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Rosetta
+        if: matrix.python_arch == 'x64'
+        run: softwareupdate --install-rosetta --agree-to-license || true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          architecture: ${{ matrix.python_arch || '' }}
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install "esptool>=4.7" "esp-idf-nvs-partition-gen>=0.1.2" "pyinstaller>=6.0"
+          ${{ matrix.arch_prefix }} pip install --upgrade pip
+          ${{ matrix.arch_prefix }} pip install "esptool>=4.7" "esp-idf-nvs-partition-gen>=0.1.2" "pyinstaller>=6.0"
 
       - name: Build binary
         run: |
-          pyinstaller \
+          ${{ matrix.arch_prefix }} pyinstaller \
             --onefile \
             --name "zclaw-nvs-tool" \
             --distpath dist \
@@ -56,12 +66,16 @@ jobs:
         shell: bash
 
       - name: Smoke test
-        run: ./dist/${{ matrix.binary }} --help
+        run: ${{ matrix.arch_prefix }} ./dist/${{ matrix.binary }} --help
         shell: bash
 
       - name: Verify architecture
         if: runner.os == 'macOS'
-        run: file ./dist/${{ matrix.binary }}
+        run: |
+          file ./dist/${{ matrix.binary }}
+          if [ "${{ matrix.python_arch }}" = "x64" ]; then
+            file ./dist/${{ matrix.binary }} | grep -q "x86_64" || { echo "::error::Expected x86_64 binary but got wrong architecture"; exit 1; }
+          fi
         shell: bash
 
       - name: Rename artifact
