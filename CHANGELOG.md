@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning.
 
+## [Unreleased]
+
+### Changed
+- Agent empty-response fallback changed from "(No response from Claude)" to "Done." with a warning log, avoiding user confusion when the LLM completes tool work but returns no text.
+
+### Docs
+- Added Kiroku memory instructions to `CLAUDE.md` for AI-assisted development workflows.
+
 ## [2.10.2-tw.2] - 2026-03-05
 
 ### Added

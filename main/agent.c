@@ -937,8 +937,10 @@ static void process_message(const char *user_message, int64_t reply_chat_id)
                 history_add("assistant", text_out, false, false, NULL, NULL);
                 send_response(text_out, reply_chat_id);
             } else {
-                history_add("assistant", "(No response from Claude)", false, false, NULL, NULL);
-                send_response("(No response from Claude)", reply_chat_id);
+                const char *fallback = "Done.";
+                ESP_LOGW(TAG, "LLM returned empty text after %d rounds, using fallback", rounds);
+                history_add("assistant", fallback, false, false, NULL, NULL);
+                send_response(fallback, reply_chat_id);
             }
             json_free_parsed_response();
             done = true;

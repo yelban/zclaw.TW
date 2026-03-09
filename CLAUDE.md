@@ -19,3 +19,8 @@ For detailed architecture, see [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
 | `scripts/test.sh host` | Run host unit tests |
 | `scripts/monitor.sh [PORT]` | Serial monitor (requires TTY) |
 | `scripts/serial-log.sh [PORT] [TIMEOUT]` | Non-interactive serial log reader (works in Claude Code) |
+
+## Memory (Kiroku)
+- Use memory_search to check relevant history before starting new tasks
+- Use memory_save when the user says "remember" or states important decisions
+- Use memory_forget when the user says "forget" or information is outdated
