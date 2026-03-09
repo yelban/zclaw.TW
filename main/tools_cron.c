@@ -36,6 +36,25 @@ static const timezone_alias_t TZ_ALIASES[] = {
     {"EST", "EST5EDT,M3.2.0/2,M11.1.0/2"},
     {"EDT", "EST5EDT,M3.2.0/2,M11.1.0/2"},
     {"ET", "EST5EDT,M3.2.0/2,M11.1.0/2"},
+
+    // Asia
+    {"Asia/Taipei", "CST-8"},
+    {"Asia/Tokyo", "JST-9"},
+    {"Asia/Seoul", "KST-9"},
+    {"Asia/Shanghai", "CST-8"},
+    {"Asia/Hong_Kong", "HKT-8"},
+    {"Asia/Singapore", "SGT-8"},
+    {"Asia/Bangkok", "ICT-7"},
+    {"Asia/Kolkata", "IST-5:30"},
+    {"Asia/Dubai", "GST-4"},
+
+    // Europe
+    {"Europe/London", "GMT0BST,M3.5.0/1,M10.5.0/2"},
+    {"Europe/Berlin", "CET-1CEST,M3.5.0/2,M10.5.0/3"},
+    {"Europe/Paris", "CET-1CEST,M3.5.0/2,M10.5.0/3"},
+
+    // Australia
+    {"Australia/Sydney", "AEST-10AEDT,M10.1.0/2,M4.1.0/3"},
 };
 
 static void trim_ascii_whitespace(const char *src, char *dst, size_t dst_len)
@@ -98,7 +117,7 @@ static bool resolve_timezone_to_posix(
         snprintf(
             error_out,
             error_out_len,
-            "Error: timezone name not recognized. Use UTC, America/Los_Angeles, America/Denver, America/Chicago, America/New_York, or a POSIX TZ string."
+            "Error: timezone name not recognized. Use common tz names (e.g. Asia/Taipei, Asia/Tokyo, America/New_York, Europe/London, UTC) or a POSIX TZ string."
         );
         return false;
     }

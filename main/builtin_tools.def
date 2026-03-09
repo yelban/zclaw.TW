@@ -91,7 +91,7 @@ TOOL_ENTRY("get_time",
            "{\"type\":\"object\",\"properties\":{}}",
            tools_get_time_handler)
 TOOL_ENTRY("set_timezone",
-           "Set device timezone used by get_time and daily cron schedules. Accepts common aliases (UTC, America/Los_Angeles, America/Denver, America/Chicago, America/New_York) or a POSIX TZ string.",
+           "Set device timezone used by get_time and daily cron schedules. Accepts common aliases (UTC, Asia/Taipei, Asia/Tokyo, America/New_York, Europe/London, ...) or a POSIX TZ string.",
            "{\"type\":\"object\",\"properties\":{\"timezone\":{\"type\":\"string\",\"description\":\"Timezone alias or POSIX TZ string\"}},\"required\":[\"timezone\"]}",
            tools_set_timezone_handler)
 TOOL_ENTRY("get_timezone",
@@ -114,6 +114,20 @@ TOOL_ENTRY("get_diagnostics",
            "Get detailed runtime diagnostics. Optional scope: quick, runtime, memory, rates, time, all. Optional verbose=true for expanded output.",
            "{\"type\":\"object\",\"properties\":{\"scope\":{\"type\":\"string\",\"enum\":[\"quick\",\"runtime\",\"memory\",\"rates\",\"time\",\"all\"],\"description\":\"Optional diagnostics scope (default quick)\"},\"verbose\":{\"type\":\"boolean\",\"description\":\"Include extra details (default false)\"}}}",
            tools_get_diagnostics_handler)
+
+// Device Aliases
+TOOL_ENTRY("set_alias",
+           "Set device alias: map a name to GPIO pin with optional state (1=ON, 0=OFF).",
+           "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"Alias name\"},\"pin\":{\"type\":\"integer\",\"description\":\"GPIO pin\"},\"state\":{\"type\":\"integer\",\"description\":\"0=OFF, 1=ON (omit for context-dependent)\"}},\"required\":[\"name\",\"pin\"]}",
+           tools_set_alias_handler)
+TOOL_ENTRY("get_aliases",
+           "List all device aliases.",
+           "{\"type\":\"object\",\"properties\":{}}",
+           tools_get_aliases_handler)
+TOOL_ENTRY("delete_alias",
+           "Delete a device alias by name.",
+           "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\",\"description\":\"Alias name to delete\"}},\"required\":[\"name\"]}",
+           tools_delete_alias_handler)
 
 // User Tool Management
 TOOL_ENTRY("create_tool",

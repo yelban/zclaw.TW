@@ -6,8 +6,12 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Added
+- `set_timezone` now supports Asia/Taipei, Asia/Tokyo, Asia/Seoul, Asia/Shanghai, Asia/Hong_Kong, Asia/Singapore, Asia/Bangkok, Asia/Kolkata, Asia/Dubai, Europe/London, Europe/Berlin, Europe/Paris, and Australia/Sydney timezone aliases.
+
 ### Changed
 - Agent empty-response fallback changed from "(No response from Claude)" to "Done." with a warning log, avoiding user confusion when the LLM completes tool work but returns no text.
+- `set_timezone` error message updated to show broader timezone examples instead of US-only list.
 
 ### Docs
 - Added Kiroku memory instructions to `CLAUDE.md` for AI-assisted development workflows.
