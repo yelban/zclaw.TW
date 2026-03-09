@@ -524,7 +524,7 @@ TEST(cron_trigger_blocks_cron_set_tool_call)
     ASSERT(mock_llm_push_result(ESP_OK, tool_call));
     ASSERT(mock_llm_push_result(ESP_OK, final_text));
 
-    agent_test_process_message("[CRON 1] arcade_power state=1");
+    agent_test_process_message("[CRON 1] Execute now: arcade_power state=1");
 
     ASSERT(mock_llm_request_count() == 2);
     ASSERT(mock_tools_execute_calls() == 0);

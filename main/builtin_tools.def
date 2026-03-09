@@ -31,7 +31,7 @@ TOOL_ENTRY("i2c_scan",
 
 // Memory
 TOOL_ENTRY("memory_set",
-           "Store a value in persistent user memory. Key must start with u_.",
+           "Store a value in persistent user memory. Key must start with u_. MUST call this when user says remember/記住/記得. Example: memory_set(key='u_name', value='小蝦').",
            "{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\",\"description\":\"User key (max 15 chars, must start with u_)\"},\"value\":{\"type\":\"string\",\"description\":\"Value to store\"}},\"required\":[\"key\",\"value\"]}",
            tools_memory_set_handler)
 TOOL_ENTRY("memory_get",
@@ -76,7 +76,7 @@ TOOL_ENTRY("reset_prompt",
 // Cron/Scheduler
 TOOL_ENTRY("cron_set",
            "Create a scheduled task. Type 'periodic' runs every N minutes. Type 'daily' runs at a specific local time in the device timezone (see set_timezone/get_timezone). Type 'once' runs one time after N minutes.",
-           "{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"periodic\",\"daily\",\"once\"]},\"interval_minutes\":{\"type\":\"integer\",\"description\":\"For periodic: minutes between runs\"},\"delay_minutes\":{\"type\":\"integer\",\"description\":\"For once: minutes from now before one-time run\"},\"hour\":{\"type\":\"integer\",\"description\":\"For daily: hour 0-23\"},\"minute\":{\"type\":\"integer\",\"description\":\"For daily: minute 0-59\"},\"action\":{\"type\":\"string\",\"description\":\"What to do when triggered\"}},\"required\":[\"type\",\"action\"]}",
+           "{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"enum\":[\"periodic\",\"daily\",\"once\"]},\"interval_minutes\":{\"type\":\"integer\",\"description\":\"For periodic: minutes between runs\"},\"delay_minutes\":{\"type\":\"integer\",\"description\":\"For once: minutes from now before one-time run\"},\"hour\":{\"type\":\"integer\",\"description\":\"For daily: hour 0-23\"},\"minute\":{\"type\":\"integer\",\"description\":\"For daily: minute 0-59\"},\"action\":{\"type\":\"string\",\"description\":\"Natural language command to execute when triggered. Use explicit GPIO commands like 'set GPIO 7 LOW' or 'turn on GPIO 4'. Never use alias names or JSON.\"}},\"required\":[\"type\",\"action\"]}",
            tools_cron_set_handler)
 TOOL_ENTRY("cron_list",
            "List all scheduled tasks.",

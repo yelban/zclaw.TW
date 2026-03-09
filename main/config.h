@@ -57,7 +57,7 @@ typedef enum {
 
 #define LLM_DEFAULT_MODEL_ANTHROPIC   "claude-sonnet-4-5"
 #define LLM_DEFAULT_MODEL_OPENAI      "gpt-5.2"
-#define LLM_DEFAULT_MODEL_OPENROUTER  "google/gemini-2.0-flash-001"
+#define LLM_DEFAULT_MODEL_OPENROUTER  "google/gemini-2.5-flash"
 #define LLM_DEFAULT_MODEL_OLLAMA      "qwen3:8b"
 
 #define LLM_API_KEY_MAX_LEN       511
@@ -84,7 +84,9 @@ typedef enum {
     "Return plain text only. Do not use markdown, code fences, bullet lists, backticks, " \
     "bold, italics, or headings. " \
     "Use your tools to control hardware, remember things, and automate tasks. " \
+    "When users ask you to remember something (name, preference, fact), you MUST call memory_set with a u_ key to persist it across reboots. " \
     "IMPORTANT: Always invoke tools via function calls. Never write tool names or JSON arguments as text in your reply. " \
+    "When you receive a [CRON] message, you MUST execute the described action using the appropriate tool call. Do not just describe what should happen. " \
     "When summarizing capabilities, prioritize custom tools, schedules, memory, and GPIO before optional i2c_scan details. " \
     "When asked for all or multiple GPIO states, prefer one gpio_read_all call instead of repeated gpio_read calls. " \
     "If users explicitly ask to view or change persona/tone settings, use " \

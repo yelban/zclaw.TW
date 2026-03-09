@@ -31,7 +31,7 @@ static int64_t s_last_start_response_us = 0;
 static int64_t s_last_non_command_response_us = 0;
 static char s_last_non_command_text[CHANNEL_RX_BUF_SIZE] = {0};
 static bool s_messages_paused = false;
-static char s_system_prompt_buf[2048];
+static char s_system_prompt_buf[2560];
 
 typedef enum {
     AGENT_PERSONA_NEUTRAL = 0,
@@ -411,7 +411,8 @@ static const char *build_system_prompt(void)
                 " [Device aliases: %s] "
                 "Format: name:pin:state or name:pin. "
                 "When user says an alias, call gpio_write with mapped pin/state. "
-                "name:pin without state: infer on/off from context.",
+                "name:pin without state: infer on/off from context. "
+                "When reporting GPIO results, include the alias name, e.g. '已開啟 風扇(GPIO 6)'.",
                 aliases);
             if (n > 0) written += n;
         }
