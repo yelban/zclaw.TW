@@ -12,15 +12,12 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
             artifact: zclaw-nvs-tool-macos-arm64
             binary: zclaw-nvs-tool
-          - os: macos-latest
-            artifact: zclaw-nvs-tool-macos-universal
-            binary: zclaw-nvs-tool
-            target_arch: universal2
           - os: ubuntu-latest
             artifact: zclaw-nvs-tool-linux-x64
             binary: zclaw-nvs-tool
@@ -55,7 +52,6 @@ jobs:
             --collect-data espefuse \
             --clean \
             --noconfirm \
-            ${{ matrix.target_arch && format('--target-architecture {0}', matrix.target_arch) || '' }} \
             scripts/zclaw-nvs-tool.py
         shell: bash
 
